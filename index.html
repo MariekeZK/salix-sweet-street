@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#3a4c32">
+  <title>Salix Sweet Street</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- App icon & manifest worden dynamisch gegenereerd door het script onderaan -->
+  <link id="favicon"       rel="icon"             type="image/png">
+  <link id="appleIcon"     rel="apple-touch-icon">
+  <link id="manifestLink"  rel="manifest">
+  <meta name="apple-mobile-web-app-title" content="Sweet Street">
+  <style>
+    :root {
+      /* ── Salix brand ─────────────────────── */
+      --cream:       #faf6ee;
+      --sage:        #4c6142;
+      --dark:        #3a4c32;
+      --ink:         #33402f;
+      --bg:          #e9e4d6;
+
+      /* ── Status colours ──────────────────── */
+      --s-todo:      #C0392B;
+      --s-bezig:     #D35400;
+      --s-proto:     #1A5276;
+      --s-def:       #6C3483;
+      --s-klaar:     #1E8449;
+
+      /* ── UI neutrals ─────────────────────── */
+      --white:       #FFFFFF;
+      --gray-100:    #F5F5F0;
+      --gray-200:    #E0DCCF;
+      --gray-400:    #A8A090;
+      --gray-600:    #6B6558;
+      --gray-800:    #33302A;
+
+      --radius:      12px;
+      --radius-sm:   8px;
+      --shadow:      0 1px 4px rgba(50,44,32,.09), 0 4px 14px rgba(50,44,32,.07);
+      --shadow-lg:   0 8px 28px rgba(50,44,32,.16);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER — gestreepte banner stijl ─── */
+    header {
+      position: sticky; top: 0; z-index: 200;
+      height: 72px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.22);
+    }
+
+    /* verticale strepen */
+    .header-stripes {
+      position: absolute; inset: 0;
+      display: flex; overflow: hidden;
+    }
+    .header-stripes .g { flex: 1; background: var(--sage); }
+    .header-stripes .c { flex: 1; background: var(--cream); }
+
+    /* lint over het midden */
+    .header-ribbon {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--dark);
+      padding: 0 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.28);
+    }
+
+    .header-brand { display: flex; flex-direction: column; }
+    .header-wordmark {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 22px;
+      letter-spacing: .14em;
+      color: var(--cream);
+      line-height: 1;
+    }
+    .header-sweetstreet {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: .08em;
+      color: rgba(250,246,238,.85);
+      margin-top: 3px;
+      line-height: 1;
+    }
+    .header-sub {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: .28em;
+      color: rgba(250,246,238,.60);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .btn-add {
+      width: 42px; height: 42px;
+      background: var(--cream); color: var(--dark);
+      border: none; border-radius: 50%;
+      font-size: 26px; font-weight: 300;
+      cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+      transition: transform .15s;
+    }
+    .btn-add:active { transform: scale(.9); }
+
+    /* ── STATS BAR ───────────────────────── */
+    .stats-bar {
+      display: flex; background: var(--ink); color: var(--cream);
+    }
+    .stat {
+      flex: 1; text-align: center; padding: 8px 2px;
+      display: flex; flex-direction: column; align-items: center; gap: 1px;
+    }
+    .stat + .stat { border-left: 1px solid rgba(250,246,238,.12); }
+    .stat-count { font-size: 19px; font-weight: 700; font-family: 'Playfair Display', serif; line-height: 1; }
+    .stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: .5px; opacity: .65; }
+
+    /* ── NOTICE ──────────────────────────── */
+    .notice {
+      margin: 14px; padding: 12px 16px;
+      background: var(--cream); border: 1px solid var(--gray-200);
+      border-radius: var(--radius-sm); font-size: 12.5px; line-height: 1.6;
+      color: var(--ink);
+    }
+    .notice strong { display: block; margin-bottom: 3px; font-size: 13px; }
+    .notice code { background: rgba(0,0,0,.08); padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+
+    /* ── TOOLBAR ─────────────────────────── */
+    .toolbar {
+      background: var(--white); border-bottom: 1px solid var(--gray-200);
+      padding: 10px 14px; display: flex; flex-direction: column; gap: 8px;
+    }
+
+    .search-wrap { position: relative; }
+    .search-wrap svg {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      width: 15px; height: 15px; color: var(--gray-400); pointer-events: none;
+    }
+    .search-input {
+      width: 100%; padding: 9px 14px 9px 34px;
+      border: 1px solid var(--gray-200); border-radius: 20px;
+      font-size: 13.5px; font-family: 'Poppins', sans-serif;
+      outline: none; background: var(--gray-100); color: var(--ink);
+      transition: border-color .2s;
+    }
+    .search-input:focus { border-color: var(--sage); background: var(--white); }
+
+    .filter-row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+    .filter-row::-webkit-scrollbar { display: none; }
+
+    .chip {
+      padding: 5px 13px; border-radius: 20px; white-space: nowrap;
+      border: 1px solid var(--gray-200); background: var(--white);
+      font-size: 12px; font-family: 'Poppins', sans-serif;
+      cursor: pointer; color: var(--gray-600); transition: all .15s;
+    }
+    .chip.active { background: var(--sage); color: var(--cream); border-color: var(--sage); }
+
+    .sort-row { display: flex; align-items: center; gap: 8px; }
+    .sort-row label { font-size: 11.5px; color: var(--gray-600); white-space: nowrap; }
+    .sort-select {
+      flex: 1; padding: 6px 10px; border: 1px solid var(--gray-200);
+      border-radius: var(--radius-sm); font-size: 12.5px; font-family: 'Poppins', sans-serif;
+      background: var(--gray-100); outline: none; color: var(--ink);
+    }
+
+    /* ── GRID ────────────────────────────── */
+    .grid { padding: 14px; display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 540px)  { .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 820px)  { .grid { grid-template-columns: repeat(3, 1fr); padding: 16px 20px; } }
+    @media (min-width: 1080px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+
+    /* ── CARD ────────────────────────────── */
+    .card {
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+
+    /* priority stripe */
+    .prio-stripe { height: 4px; }
+    .prio-stripe.hoog   { background: #C0392B; }
+    .prio-stripe.middel { background: #D35400; }
+    .prio-stripe.laag   { background: #74C69D; }
+
+    .card-body { padding: 13px 14px 9px; flex: 1; }
+
+    .card-top {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+      margin-bottom: 5px;
+    }
+    .card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px; font-weight: 700; line-height: 1.3;
+      color: var(--ink);
+    }
+    .btn-edit {
+      background: none; border: none; cursor: pointer;
+      font-size: 14px; padding: 2px 4px; border-radius: 6px;
+      color: var(--gray-400); flex-shrink: 0;
+      transition: background .15s, color .15s;
+    }
+    .btn-edit:hover { background: var(--gray-100); color: var(--ink); }
+
+    .card-desc {
+      font-size: 11.5px; color: var(--gray-600); line-height: 1.5; margin-bottom: 10px;
+      font-weight: 300;
+    }
+
+    /* score dots */
+    .scores { display: flex; gap: 8px; flex-wrap: wrap; }
+    .score-pill {
+      display: flex; align-items: center; gap: 3px;
+      padding: 3px 7px; border-radius: 20px; font-size: 10px;
+    }
+    .score-pill.pot { background: #EAF3EB; color: var(--dark); }
+    .score-pill.bew { background: #FEF3E2; color: #784212; }
+    .score-pill.suc { background: #EEF2FF; color: #3730A3; }
+
+    .score-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+
+    .score-dots { display: flex; gap: 2px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(0,0,0,.12); }
+    .dot.on.pot { background: var(--sage); }
+    .dot.on.bew { background: #E67E22; }
+    .dot.on.suc { background: #6366F1; }
+
+    /* card footer */
+    .card-footer {
+      padding: 8px 14px 12px;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+
+    /* status badge — clickable */
+    .sbadge {
+      padding: 4px 11px; border-radius: 20px; border: none;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      font-family: 'Poppins', sans-serif; transition: opacity .15s;
+      white-space: nowrap;
+    }
+    .sbadge:hover { opacity: .8; }
+    .s-todo  { background: #FDEDEC; color: var(--s-todo); }
+    .s-bezig { background: #FEF5E7; color: var(--s-bezig); }
+    .s-proto { background: #EAF2F8; color: var(--s-proto); }
+    .s-def   { background: #F5EEF8; color: var(--s-def); }
+    .s-klaar { background: #E9F7EF; color: var(--s-klaar); }
+
+    /* notes */
+    .btn-notes {
+      background: none; border: none; font-size: 14px; cursor: pointer;
+      padding: 4px 6px; border-radius: 6px; color: var(--gray-400);
+      transition: color .15s;
+    }
+    .btn-notes:hover { color: var(--sage); }
+
+    .notes-panel {
+      margin: 0 12px 12px;
+      padding: 10px 12px;
+      background: #FFFBE6;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid #F1C40F;
+      font-size: 11.5px; line-height: 1.65;
+      color: var(--gray-800);
+      white-space: pre-wrap;
+      font-family: 'Poppins', sans-serif; font-weight: 300;
+      display: none;
+    }
+    .notes-panel.open { display: block; }
+
+    /* empty */
+    .empty {
+      grid-column: 1/-1; text-align: center;
+      padding: 60px 20px; color: var(--gray-400);
+    }
+    .empty .icon { font-size: 48px; margin-bottom: 12px; }
+    .empty h3 { font-size: 17px; color: var(--gray-600); font-family: 'Playfair Display', serif; margin-bottom: 6px; }
+    .empty p  { font-size: 13px; }
+
+    /* ── MODAL ───────────────────────────── */
+    .overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(33,40,25,.55);
+      display: none; align-items: flex-end; justify-content: center;
+    }
+    .overlay.open { display: flex; animation: fadeIn .2s; }
+    @media (min-width: 600px) { .overlay { align-items: center; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal {
+      background: var(--white);
+      width: 100%; max-width: 540px; max-height: 93vh;
+      border-radius: 20px 20px 0 0;
+      padding: 24px 20px 44px;
+      overflow-y: auto;
+      animation: slideUp .25s ease;
+    }
+    @media (min-width: 600px) { .modal { border-radius: 20px; padding: 32px; } }
+    @keyframes slideUp { from { transform: translateY(60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700; color: var(--ink);
+    }
+    .btn-close {
+      background: var(--gray-100); border: none; border-radius: 50%;
+      width: 34px; height: 34px; font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gray-600);
+    }
+
+    .field { margin-bottom: 17px; }
+    .field label {
+      display: block; font-size: 10.5px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .6px;
+      color: var(--gray-600); margin-bottom: 7px;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 11px 14px;
+      border: 1px solid var(--gray-200); border-radius: var(--radius-sm);
+      font-size: 14.5px; font-family: 'Poppins', sans-serif;
+      outline: none; background: var(--gray-100); color: var(--ink);
+      transition: border-color .2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--sage); background: var(--white);
+    }
+    .field textarea { resize: vertical; min-height: 88px; }
+
+    /* scores section */
+    .scores-section {
+      background: var(--gray-100); border-radius: var(--radius-sm);
+      padding: 14px; margin-bottom: 17px;
+      border: 1px solid var(--gray-200);
+    }
+    .scores-section h4 {
+      font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .6px; color: var(--gray-600); margin-bottom: 14px;
+    }
+    .score-field { margin-bottom: 15px; }
+    .score-field:last-child { margin-bottom: 0; }
+    .score-field label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 500; color: var(--gray-800);
+      margin-bottom: 6px; text-transform: none; letter-spacing: 0;
+    }
+    .score-hint { font-size: 11px; color: var(--gray-400); font-weight: 300; }
+
+    /* stars */
+    .stars-row { display: flex; gap: 4px; }
+    .star {
+      font-size: 28px; cursor: pointer; color: var(--gray-200);
+      transition: color .1s, transform .12s; line-height: 1;
+      user-select: none;
+    }
+    .star.on { color: #F4A820; }
+    .star:hover { transform: scale(1.18); }
+
+    /* buttons */
+    .btn-primary {
+      width: 100%; padding: 14px;
+      background: var(--sage); color: var(--cream);
+      border: none; border-radius: var(--radius-sm);
+      font-size: 15px; font-weight: 600; font-family: 'Poppins', sans-serif;
+      cursor: pointer; transition: background .2s; margin-top: 6px;
+    }
+    .btn-primary:hover { background: var(--dark); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-danger {
+      width: 100%; padding: 11px;
+      background: none; color: var(--s-todo);
+      border: 1px solid var(--s-todo); border-radius: var(--radius-sm);
+      font-size: 13.5px; font-family: 'Poppins', sans-serif;
+      cursor: pointer; margin-top: 10px; transition: background .15s;
+    }
+    .btn-danger:hover { background: #FDEDEC; }
+
+    /* status legend strip in modal */
+    .status-flow {
+      display: flex; gap: 4px; align-items: center;
+      margin-bottom: 6px; flex-wrap: wrap;
+    }
+    .sf-badge {
+      padding: 3px 9px; border-radius: 20px;
+      font-size: 10px; font-weight: 600; font-family: 'Poppins', sans-serif;
+    }
+    .sf-arr { font-size: 10px; color: var(--gray-400); }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────── -->
+<header>
+  <div class="header-stripes">
+    <span class="g"></span><span class="c"></span><span class="g"></span><span class="c"></span>
+    <span class="g"></span><span class="c"></span><span class="g"></span><span class="c"></span>
+    <span class="g"></span><span class="c"></span><span class="g"></span><span class="c"></span>
+    <span class="g"></span><span class="c"></span><span class="g"></span><span class="c"></span>
+    <span class="g"></span><span class="c"></span><span class="g"></span><span class="c"></span>
+    <span class="g"></span><span class="c"></span><span class="g"></span><span class="c"></span>
+    <span class="g"></span><span class="c"></span><span class="g"></span><span class="c"></span>
+    <span class="g"></span>
+  </div>
+  <div class="header-ribbon">
+    <div class="header-brand">
+      <div class="header-wordmark">SALIX</div>
+      <div class="header-sweetstreet">Sweet Street</div>
+      <div class="header-sub">Giftshop</div>
+    </div>
+    <button class="btn-add" onclick="openModal()" title="Product toevoegen">+</button>
+  </div>
+</header>
+
+<!-- ── STATS ───────────────────────────────────── -->
+<div class="stats-bar">
+  <div class="stat"><div class="stat-count" id="st-todo">–</div><div class="stat-label">Te doen</div></div>
+  <div class="stat"><div class="stat-count" id="st-bezig">–</div><div class="stat-label">Bezig</div></div>
+  <div class="stat"><div class="stat-count" id="st-proto">–</div><div class="stat-label">Proto</div></div>
+  <div class="stat"><div class="stat-count" id="st-def">–</div><div class="stat-label">Definitief</div></div>
+  <div class="stat"><div class="stat-count" id="st-klaar">–</div><div class="stat-label">Klaar</div></div>
+</div>
+
+<!-- ── CONFIG NOTICE ───────────────────────────── -->
+<div id="configNotice" class="notice" style="display:none">
+  <strong>⚙️ Demo-modus — Firebase nog niet verbonden</strong>
+  Vul de variabele <code>FIREBASE_CONFIG</code> bovenaan het script in. Wijzigingen blijven nu lokaal in de browser bewaard.
+</div>
+
+<!-- ── TOOLBAR ─────────────────────────────────── -->
+<div class="toolbar">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input class="search-input" id="searchInput" type="search" placeholder="Zoek product…" oninput="render()">
+  </div>
+  <div class="filter-row" id="filterRow">
+    <button class="chip active" onclick="setFilter('alle',this)">Alle</button>
+    <button class="chip" onclick="setFilter('todo',this)">📋 Te doen</button>
+    <button class="chip" onclick="setFilter('bezig',this)">⚡ Bezig</button>
+    <button class="chip" onclick="setFilter('proto',this)">🔵 Proto</button>
+    <button class="chip" onclick="setFilter('definitief',this)">🟣 Definitief</button>
+    <button class="chip" onclick="setFilter('klaar',this)">✅ Klaar</button>
+    <button class="chip" onclick="setFilter('hoog',this)">🔴 Hoge prio</button>
+  </div>
+  <div class="sort-row">
+    <label for="sortSel">Sorteren:</label>
+    <select class="sort-select" id="sortSel" onchange="render()">
+      <option value="prio">Prioriteit (hoog → laag)</option>
+      <option value="naam">Naam A → Z</option>
+      <option value="status">Fase</option>
+      <option value="nieuw">Nieuwste eerst</option>
+    </select>
+  </div>
+</div>
+
+<!-- ── PRODUCT GRID ─────────────────────────────── -->
+<div class="grid" id="grid">
+  <p style="padding:40px;text-align:center;color:var(--gray-400);grid-column:1/-1">Laden…</p>
+</div>
+
+<!-- ── MODAL ────────────────────────────────────── -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Product toevoegen</span>
+      <button class="btn-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <form id="productForm" onsubmit="saveProduct(event)">
+
+      <div class="field">
+        <label>Productnaam *</label>
+        <input id="fNaam" type="text" placeholder="bijv. Slabbetjes" required autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>Omschrijving</label>
+        <input id="fOmschrijving" type="text" placeholder="Zichtbaar op de kaart">
+      </div>
+
+      <div class="field">
+        <label>Fase / status</label>
+        <div class="status-flow">
+          <span class="sf-badge s-todo">Te doen</span>
+          <span class="sf-arr">→</span>
+          <span class="sf-badge s-bezig">Bezig</span>
+          <span class="sf-arr">→</span>
+          <span class="sf-badge s-proto">Proto</span>
+          <span class="sf-arr">→</span>
+          <span class="sf-badge s-def">Definitief</span>
+          <span class="sf-arr">→</span>
+          <span class="sf-badge s-klaar">Klaar</span>
+        </div>
+        <select id="fStatus">
+          <option value="todo">📋 Te doen</option>
+          <option value="bezig">⚡ Bezig</option>
+          <option value="proto">🔵 Proto klaar</option>
+          <option value="definitief">🟣 Definitief klaar</option>
+          <option value="klaar">✅ Klaar</option>
+        </select>
+      </div>
+
+      <div class="scores-section">
+        <h4>Prioriteitsscores</h4>
+
+        <div class="score-field">
+          <label>
+            <span style="color:var(--sage);font-size:16px">●</span>
+            Potentie
+            <span class="score-hint">— impact voor de shop?</span>
+          </label>
+          <div class="stars-row" id="stars-potentie"></div>
+        </div>
+
+        <div class="score-field">
+          <label>
+            <span style="color:#E67E22;font-size:16px">●</span>
+            Bewerkelijkheid
+            <span class="score-hint">— hoe makkelijk? (5 = heel eenvoudig)</span>
+          </label>
+          <div class="stars-row" id="stars-bewerkelijkheid"></div>
+        </div>
+
+        <div class="score-field">
+          <label>
+            <span style="color:#6366F1;font-size:16px">●</span>
+            Succesgevoel
+            <span class="score-hint">— hoe blij maakt dit jou?</span>
+          </label>
+          <div class="stars-row" id="stars-succesgevoel"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>📝 Notities <span style="font-weight:300;text-transform:none;letter-spacing:0">(verborgen op de kaart)</span></label>
+        <textarea id="fNotities" placeholder="Leverancier, ideeën, aantekeningen…"></textarea>
+      </div>
+
+      <button type="submit" class="btn-primary" id="btnSave">Opslaan</button>
+      <button type="button" class="btn-danger" id="btnDelete" style="display:none" onclick="deleteProduct()">🗑 Product verwijderen</button>
+
+    </form>
+  </div>
+</div>
+
+<!-- ── FIREBASE ──────────────────────────────────── -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ================================================================
+//  🔧  FIREBASE CONFIGURATIE
+//  Vul hier je eigen gegevens in vanuit Firebase Console
+//  → Projectinstellingen → Je apps → Config-object
+// ================================================================
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyBtn07YkYWpRVlkHPzoP8l2WI4ANpqZv8w",
+  authDomain:        "salix-sweet-street.firebaseapp.com",
+  projectId:         "salix-sweet-street",
+  storageBucket:     "salix-sweet-street.firebasestorage.app",
+  messagingSenderId: "479733350392",
+  appId:             "1:479733350392:web:6c54d4e0313d458ed0200d"
+};
+// ================================================================
+
+// ── Sample data (van de post-its) ─────────────────────────────
+const SAMPLE = [
+  { naam:'Slabbetjes',         omschrijving:'Pastelkleuren, naam van kind instelbaar',  status:'todo',        potentie:5, bewerkelijkheid:4, succesgevoel:5, notities:'Kleur ondersteek = naam van dikje\nSponges, slab, blauwe handjes, shoala' },
+  { naam:'Slingers',           omschrijving:'Nog niet vervaardigd',                     status:'todo',        potentie:4, bewerkelijkheid:3, succesgevoel:4, notities:'Niet vervaardigd – erbij cond!' },
+  { naam:'Babyknuffel',        omschrijving:'Denim uitvoering',                         status:'bezig',       potentie:5, bewerkelijkheid:2, succesgevoel:5, notities:'' },
+  { naam:'Dog tie',            omschrijving:'Ontwerp nog te maken',                     status:'todo',        potentie:3, bewerkelijkheid:4, succesgevoel:3, notities:'Ontwerpen – dog tie Antwerpen' },
+  { naam:'Sleutelhanger kind', omschrijving:'Sloefje thema / bad',                     status:'proto',       potentie:4, bewerkelijkheid:5, succesgevoel:4, notities:'Sleutelhanger kind bad – Antwerpen\nHelden ontwerp' },
+  { naam:'Kado envelopjes',    omschrijving:'Gift envelopes bij cadeaus',               status:'definitief',  potentie:4, bewerkelijkheid:5, succesgevoel:3, notities:'' },
+  { naam:'Bracelet',           omschrijving:'Armbandje / doggy walker thema',           status:'todo',        potentie:4, bewerkelijkheid:4, succesgevoel:4, notities:'Coquins – bracelet, doggy walker of spelkunstje' },
+  { naam:'Biaszakken',         omschrijving:'Op maat gemaakte tassen met logo',        status:'todo',        potentie:3, bewerkelijkheid:2, succesgevoel:3, notities:'Niet handgemaakt, op maat (logo?)\n4 materiaalsoorten\nBorduurpakje?' },
+  { naam:'Fleece deken',       omschrijving:'Vlecht hond thema',                        status:'todo',        potentie:3, bewerkelijkheid:3, succesgevoel:3, notities:'Fleece vlacht – hond' },
+  { naam:'Kadozakjes',         omschrijving:'Gift bags algemeen',                       status:'klaar',       potentie:3, bewerkelijkheid:5, succesgevoel:2, notities:'' },
+  { naam:'Peurzakjes',         omschrijving:'Kleine zakjes',                            status:'todo',        potentie:3, bewerkelijkheid:4, succesgevoel:3, notities:'Stijl bepalen' },
+];
+
+// ── State ────────────────────────────────────────────────────
+let products     = [];
+let editingId    = null;
+let activeFilter = 'alle';
+let ratings      = { potentie: 0, bewerkelijkheid: 0, succesgevoel: 0 };
+let db           = null;
+let useLocal     = false;
+
+// ── Firebase init ────────────────────────────────────────────
+function initFirebase() {
+  if (FIREBASE_CONFIG.apiKey === 'JOUW-API-KEY') {
+    useLocal = true;
+    document.getElementById('configNotice').style.display = 'block';
+    initLocal();
+    return;
+  }
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    db.collection('products').orderBy('ts','desc').onSnapshot(snap => {
+      products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      render();
+    });
+  } catch(e) {
+    console.error('Firebase fout:', e);
+    useLocal = true;
+    document.getElementById('configNotice').style.display = 'block';
+    initLocal();
+  }
+}
+
+// ── Local storage ─────────────────────────────────────────────
+const LS_KEY = 'salix_v2';
+
+function initLocal() {
+  const saved = localStorage.getItem(LS_KEY);
+  if (saved) {
+    products = JSON.parse(saved);
+  } else {
+    products = SAMPLE.map((p, i) => ({ id: String(Date.now() + i), ts: Date.now() - i * 1000, ...p }));
+    saveLocal();
+  }
+  render();
+}
+function saveLocal() { localStorage.setItem(LS_KEY, JSON.stringify(products)); }
+
+// ── CRUD ─────────────────────────────────────────────────────
+async function addProduct(data) {
+  if (useLocal) {
+    products.unshift({ id: Date.now().toString(), ts: Date.now(), ...data });
+    saveLocal(); render();
+  } else {
+    await db.collection('products').add({ ts: firebase.firestore.FieldValue.serverTimestamp(), ...data });
+  }
+}
+async function updateProduct(id, data) {
+  if (useLocal) {
+    const i = products.findIndex(p => p.id === id);
+    if (i !== -1) { products[i] = { ...products[i], ...data }; saveLocal(); render(); }
+  } else {
+    await db.collection('products').doc(id).update(data);
+  }
+}
+async function removeProduct(id) {
+  if (useLocal) {
+    products = products.filter(p => p.id !== id); saveLocal(); render();
+  } else {
+    await db.collection('products').doc(id).delete();
+  }
+}
+
+// ── Priority ──────────────────────────────────────────────────
+function prioScore(p) { return (p.potentie + p.succesgevoel) * p.bewerkelijkheid; }
+function prioLabel(p) {
+  const s = prioScore(p);
+  if (s >= 30) return 'hoog';
+  if (s >= 14) return 'middel';
+  return 'laag';
+}
+
+// ── Status config ─────────────────────────────────────────────
+const STATUS = {
+  todo:        { label:'📋 Te doen',       css:'s-todo',  next:'bezig' },
+  bezig:       { label:'⚡ Bezig',          css:'s-bezig', next:'proto' },
+  proto:       { label:'🔵 Proto',          css:'s-proto', next:'definitief' },
+  definitief:  { label:'🟣 Definitief',     css:'s-def',   next:'klaar' },
+  klaar:       { label:'✅ Klaar',          css:'s-klaar', next:'todo' },
+};
+
+// ── Render ─────────────────────────────────────────────────────
+function render() {
+  const q    = document.getElementById('searchInput').value.toLowerCase();
+  const sort = document.getElementById('sortSel').value;
+
+  let list = products.filter(p => {
+    if (q && !p.naam.toLowerCase().includes(q) && !(p.omschrijving||'').toLowerCase().includes(q)) return false;
+    if (activeFilter === 'hoog') return prioLabel(p) === 'hoog';
+    if (activeFilter !== 'alle') return p.status === activeFilter;
+    return true;
+  });
+
+  const sortOrder = {todo:0,bezig:1,proto:2,definitief:3,klaar:4};
+  if (sort === 'prio')   list.sort((a,b) => prioScore(b) - prioScore(a));
+  if (sort === 'naam')   list.sort((a,b) => a.naam.localeCompare(b.naam, 'nl'));
+  if (sort === 'status') list.sort((a,b) => sortOrder[a.status] - sortOrder[b.status]);
+  if (sort === 'nieuw')  list.sort((a,b) => (b.ts||0) - (a.ts||0));
+
+  // Stats
+  Object.keys(STATUS).forEach(s => {
+    const el = document.getElementById('st-'+s);
+    if (el) el.textContent = products.filter(p => p.status === s).length;
+  });
+
+  const grid = document.getElementById('grid');
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty">
+      <div class="icon">🌿</div>
+      <h3>Geen producten gevonden</h3>
+      <p>Pas het filter aan of voeg een nieuw product toe.</p>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = list.map(cardHTML).join('');
+}
+
+function dots(val, cls) {
+  return [1,2,3,4,5].map(i => `<span class="dot${i<=val?' on '+cls:''}"></span>`).join('');
+}
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function cardHTML(p) {
+  const pl = prioLabel(p);
+  const st = STATUS[p.status] || STATUS.todo;
+  const hasNotes = p.notities && p.notities.trim();
+
+  return `<div class="card" id="c-${p.id}">
+  <div class="prio-stripe ${pl}"></div>
+  <div class="card-body">
+    <div class="card-top">
+      <div class="card-name">${esc(p.naam)}</div>
+      <button class="btn-edit" onclick="openModal('${p.id}')" title="Bewerken">✏️</button>
+    </div>
+    ${p.omschrijving ? `<div class="card-desc">${esc(p.omschrijving)}</div>` : ''}
+    <div class="scores">
+      <div class="score-pill pot"><span class="score-label">P</span><div class="score-dots">${dots(p.potentie,'pot')}</div></div>
+      <div class="score-pill bew"><span class="score-label">B</span><div class="score-dots">${dots(p.bewerkelijkheid,'bew')}</div></div>
+      <div class="score-pill suc"><span class="score-label">S</span><div class="score-dots">${dots(p.succesgevoel,'suc')}</div></div>
+    </div>
+  </div>
+  <div class="card-footer">
+    <button class="sbadge ${st.css}" onclick="cycleStatus('${p.id}')" title="Klik om door te zetten">${st.label}</button>
+    ${hasNotes ? `<button class="btn-notes" onclick="toggleNotes('${p.id}')" title="Notities">📝</button>` : ''}
+  </div>
+  ${hasNotes ? `<div class="notes-panel" id="np-${p.id}">${esc(p.notities)}</div>` : ''}
+</div>`;
+}
+
+// ── Interactions ───────────────────────────────────────────────
+function toggleNotes(id) { document.getElementById('np-'+id)?.classList.toggle('open'); }
+
+function cycleStatus(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  updateProduct(id, { status: STATUS[p.status]?.next || 'todo' });
+}
+
+function setFilter(val, btn) {
+  activeFilter = val;
+  document.querySelectorAll('#filterRow .chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+// ── Modal ──────────────────────────────────────────────────────
+function buildStars() {
+  ['potentie','bewerkelijkheid','succesgevoel'].forEach(f => {
+    document.getElementById('stars-'+f).innerHTML =
+      [1,2,3,4,5].map(v => `<span class="star" onclick="setRating('${f}',${v})">★</span>`).join('');
+  });
+}
+
+function setRating(field, val) { ratings[field] = val; updateStarDisplay(); }
+
+function updateStarDisplay() {
+  ['potentie','bewerkelijkheid','succesgevoel'].forEach(f => {
+    document.querySelectorAll(`#stars-${f} .star`).forEach((s,i) => s.classList.toggle('on', i < ratings[f]));
+  });
+}
+
+function openModal(id) {
+  editingId = id || null;
+  ratings   = { potentie: 0, bewerkelijkheid: 0, succesgevoel: 0 };
+
+  document.getElementById('modalTitle').textContent = id ? 'Product bewerken' : 'Product toevoegen';
+  document.getElementById('btnDelete').style.display = id ? 'block' : 'none';
+  document.getElementById('btnSave').textContent = id ? 'Wijzigingen opslaan' : 'Product toevoegen';
+
+  if (id) {
+    const p = products.find(x => x.id === id);
+    if (p) {
+      document.getElementById('fNaam').value         = p.naam || '';
+      document.getElementById('fOmschrijving').value = p.omschrijving || '';
+      document.getElementById('fStatus').value       = p.status || 'todo';
+      document.getElementById('fNotities').value     = p.notities || '';
+      ratings = { potentie: p.potentie||0, bewerkelijkheid: p.bewerkelijkheid||0, succesgevoel: p.succesgevoel||0 };
+    }
+  } else {
+    document.getElementById('fNaam').value         = '';
+    document.getElementById('fOmschrijving').value = '';
+    document.getElementById('fStatus').value       = 'todo';
+    document.getElementById('fNotities').value     = '';
+  }
+
+  updateStarDisplay();
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(() => document.getElementById('fNaam').focus(), 80);
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  editingId = null;
+}
+function overlayClick(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+
+async function saveProduct(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnSave');
+  btn.disabled = true; btn.textContent = 'Bezig…';
+
+  const data = {
+    naam:            document.getElementById('fNaam').value.trim(),
+    omschrijving:    document.getElementById('fOmschrijving').value.trim(),
+    status:          document.getElementById('fStatus').value,
+    notities:        document.getElementById('fNotities').value.trim(),
+    potentie:        ratings.potentie,
+    bewerkelijkheid: ratings.bewerkelijkheid,
+    succesgevoel:    ratings.succesgevoel,
+  };
+
+  try {
+    if (editingId) await updateProduct(editingId, data);
+    else           await addProduct(data);
+    closeModal();
+  } catch(err) {
+    console.error(err);
+    alert('Er ging iets mis. Controleer je Firebase-verbinding.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = editingId ? 'Wijzigingen opslaan' : 'Product toevoegen';
+  }
+}
+
+async function deleteProduct() {
+  if (!editingId) return;
+  const p = products.find(x => x.id === editingId);
+  if (!confirm(`"${p?.naam}" verwijderen?`)) return;
+  await removeProduct(editingId);
+  closeModal();
+}
+
+// ── Keyboard ───────────────────────────────────────────────────
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ── Boot ───────────────────────────────────────────────────────
+buildStars();
+initFirebase();
+generateAppIcon();
+</script>
+
+<!-- ── APP ICON + PWA MANIFEST ─────────────────────────────── -->
+<canvas id="iconCanvas" width="512" height="512" style="display:none"></canvas>
+<script>
+function generateAppIcon() {
+  const canvas = document.getElementById('iconCanvas');
+  const ctx    = canvas.getContext('2d');
+  const W = 512, H = 512, cx = W/2, cy = H/2;
+
+  // ── Achtergrond (cream) ──
+  ctx.fillStyle = '#faf6ee';
+  ctx.fillRect(0, 0, W, H);
+
+  // ── Buitenring: 30 paren wisselende sektoren ──
+  const PAIRS = 30;
+  const DEG   = (2 * Math.PI) / PAIRS;
+  const HALF  = DEG / 2;
+  const Ro    = 256; // buitenstraal
+  const Ri    = 228; // binnenstraal
+
+  function drawSector(a1, a2, color) {
+    ctx.beginPath();
+    ctx.moveTo(cx + Ro * Math.cos(a1), cy + Ro * Math.sin(a1));
+    ctx.arc(cx, cy, Ro, a1, a2);
+    ctx.arc(cx, cy, Ri, a2, a1, true);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  for (let i = 0; i < PAIRS; i++) {
+    const a0 = -Math.PI/2 + i * DEG;
+    drawSector(a0,        a0 + HALF, '#4c6142'); // sage groen
+    drawSector(a0 + HALF, a0 + DEG,  '#faf6ee'); // crème
+  }
+
+  // ── Binnenste cirkel (sage) ──
+  ctx.beginPath();
+  ctx.arc(cx, cy, Ri - 2, 0, 2 * Math.PI);
+  ctx.fillStyle = '#4c6142';
+  ctx.fill();
+
+  // ── Subtiele binnenrand ──
+  ctx.beginPath();
+  ctx.arc(cx, cy, Ri - 14, 0, 2 * Math.PI);
+  ctx.strokeStyle = 'rgba(250,246,238,0.35)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Wacht op font, teken dan tekst
+  document.fonts.ready.then(() => {
+    // ── "SALIX" bovenaan ──
+    ctx.fillStyle   = 'rgba(250,246,238,0.90)';
+    ctx.font        = '400 38px Poppins, sans-serif';
+    ctx.letterSpacing = '14px';
+    ctx.textAlign   = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('SALIX', cx + 7, cy - 128);
+
+    // ── Grote "S" monogram ──
+    ctx.fillStyle = '#faf6ee';
+    ctx.font      = '900 280px "Playfair Display", serif';
+    ctx.letterSpacing = '0px';
+    ctx.fillText('S', cx, cy + 40);
+
+    // ── "GIFTSHOP" onderaan ──
+    ctx.fillStyle = 'rgba(250,246,238,0.80)';
+    ctx.font      = '300 32px Poppins, sans-serif';
+    ctx.letterSpacing = '10px';
+    ctx.fillText('GIFTSHOP', cx + 5, cy + 148);
+
+    // ── Exporteer als PNG en stel in als icon ──
+    const dataURL = canvas.toDataURL('image/png');
+
+    document.getElementById('favicon').href   = dataURL;
+    document.getElementById('appleIcon').href = dataURL;
+
+    // ── PWA Manifest via Blob ──
+    const manifest = {
+      name:             'Salix Sweet Street',
+      short_name:       'Sweet Street',
+      description:      'Prioriteitenoverzicht voor Salix Sweet Street Giftshop',
+      start_url:        './',
+      display:          'standalone',
+      background_color: '#3a4c32',
+      theme_color:      '#3a4c32',
+      orientation:      'portrait-primary',
+      icons: [
+        { src: dataURL, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+      ]
+    };
+    const blob      = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+    const blobURL   = URL.createObjectURL(blob);
+    document.getElementById('manifestLink').href = blobURL;
+  });
+}
+</script>
+</body>
+</html>
